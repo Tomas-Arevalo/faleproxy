@@ -16,6 +16,14 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Function to ensure URLs have a protocol
+function ensureProtocol(url) {
+  if (!/^[a-zA-Z]+:\/\//.test(url)) {
+    return `http://${url}`;
+  }
+  return url;
+}
+
 // API endpoint to fetch and modify content
 app.post('/fetch', async (req, res) => {
   try {
@@ -25,8 +33,11 @@ app.post('/fetch', async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
+    // Ensure URL has a protocol
+    const processedUrl = ensureProtocol(url);
+
     // Fetch the content from the provided URL
-    const response = await axios.get(url);
+    const response = await axios.get(processedUrl);
     const html = response.data;
 
     // Use cheerio to parse HTML and selectively replace text content, not URLs
@@ -77,7 +88,13 @@ app.post('/fetch', async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Faleproxy server running at http://localhost:${PORT}`);
-});
+// Export for testing
+module.exports = { ensureProtocol, app };
+
+// Only start the server if this file is run directly (not imported as a module)
+if (require.main === module) {
+  // Start the server
+  app.listen(PORT, () => {
+    console.log(`Faleproxy server running at http://localhost:${PORT}`);
+  });
+}
