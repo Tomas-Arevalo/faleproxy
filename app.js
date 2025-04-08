@@ -88,8 +88,12 @@ app.post('/fetch', async (req, res) => {
   }
 });
 
-// Export for testing
-module.exports = { ensureProtocol, app };
+// For Vercel serverless functions, we need to export the Express app as the default export
+// This allows Vercel to use it as a serverless function
+module.exports = app;
+
+// Also export other functions for testing
+module.exports.ensureProtocol = ensureProtocol;
 
 // Only start the server if this file is run directly (not imported as a module)
 if (require.main === module) {
